@@ -1,0 +1,28 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-I./include",
+      "-o",
+      "game",
+      "./source/RenderWindow.cpp"
+    ],
+    "directory": "/home/hussienma/Desktop/Learning SDL",
+    "file": "/home/hussienma/Desktop/Learning SDL/source/RenderWindow.cpp",
+    "output": "/home/hussienma/Desktop/Learning SDL/game"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-I./include",
+      "-o",
+      "game",
+      "./source/main.cpp"
+    ],
+    "directory": "/home/hussienma/Desktop/Learning SDL",
+    "file": "/home/hussienma/Desktop/Learning SDL/source/main.cpp",
+    "output": "/home/hussienma/Desktop/Learning SDL/game"
+  }
+]
