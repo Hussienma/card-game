@@ -3,15 +3,18 @@
 #include <iostream>
 #include <SDL2/SDL_render.h>
 
-enum Color{ RED, YELLOW, GREEN, BLUE };
+enum Color{ RED, YELLOW, GREEN, BLUE, WILD };
 
 class Card: public Entity {
 private:
 	Color color;
 	Uint16 value;
+	bool hovering;
 public:
-	Card(Color color, Uint16 value, SDL_Texture* tex) : color(color), value(value), Entity(0,0,tex){}
+	Card(Color color, Uint16 value, SDL_Rect pos, SDL_Rect frame, SDL_Texture* tex);
 	Color getColor();
 	std::string getColorString();
 	Uint16 getValue();
+	void hover();
+	void unhover();
 };

@@ -1,5 +1,9 @@
 #include "Card.hpp"
+#include <SDL2/SDL_render.h>
 
+Card::Card(Color color, Uint16 value, SDL_Rect pos, SDL_Rect frame, SDL_Texture* tex) : color(color), value(value), Entity(pos, frame, tex){
+
+}
 Color Card::getColor(){ return color; }
 
 Uint16 Card::getValue(){ return value; }
@@ -17,4 +21,20 @@ std::string Card::getColorString(){
 		default:
 			return "Unknown";
 	}
+}
+
+void Card::hover(){
+	if(hovering) return;
+	int x = getPos().x;
+	int y = getPos().y - 20;
+	updatePos(x, y);
+	hovering = true;
+}
+
+void Card::unhover(){
+	if(!hovering) return;
+	int x = getPos().x;
+	int y = getPos().y + 20;
+	updatePos(x, y);
+	hovering = false;
 }

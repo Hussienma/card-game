@@ -16,7 +16,9 @@ private:
 public:
 	Game(Player* player, std::vector<Card>& cards);
 	void draw(Player* player);
-	void play(Player* player, Card* card);
+	bool play(Player* player, Card* card);
+	void refillDeck();
+	Card* getCardOnField();
 	void displayCards(std::vector<Card*> cards);
 	void displayPlayerCards(Player* player);
 };

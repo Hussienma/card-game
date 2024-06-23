@@ -12,7 +12,7 @@
 RenderWindow::RenderWindow(const char* title, int width, int height){
 	window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN);
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 1);
+	SDL_SetRenderDrawColor(renderer, 240, 240, 240, 1);
 	
 }
 
@@ -29,10 +29,10 @@ void RenderWindow::clear(){
 
 void RenderWindow::render(Entity& entity){
 	SDL_Rect src;
-	src.x = 0;
-	src.y = 0;
-	src.w = 64;
-	src.h = 53;
+	src.x = entity.getCurrentFrame().x;
+	src.y = entity.getCurrentFrame().y;
+	src.w = entity.getCurrentFrame().w;
+	src.h = entity.getCurrentFrame().h;
 
 	SDL_Rect dst;
 	dst.x = entity.getPos().x;

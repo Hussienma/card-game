@@ -11,7 +11,6 @@ void Player::draw(Card* card){
 Card* Player::play(Card* card){
 	ptrdiff_t pos = std::distance(cards.begin(), std::find(cards.begin(), cards.end(), card));
 	if(pos >= cards.size()){
-		std::cout<<"Invalid play: card played not found!\n";
 		return NULL;
 	}
 //	std::cout<<"The card is at: "<<pos<<", vector size: "<<cards.size()<<std::endl;
@@ -22,10 +21,15 @@ Card* Player::play(Card* card){
 
 void Player::sortCards(){
 	std::sort(cards.begin(), cards.end());
-	int i=0;
+
+	int w = 96; 
+	int h = 128;
+	int i = 128;
 	for(Card* card: cards){
-		card->updatePos(i, card->getPos().y);
-		i += card->getPos().w;
+		card->unhover();
+		card->updatePos(i, handLocation);
+		card->resize(w, h);
+		i += w/1.5;
 	}
 }
 
