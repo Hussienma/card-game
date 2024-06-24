@@ -26,15 +26,17 @@ std::string Card::getColorString(){
 void Card::hover(){
 	if(hovering) return;
 	int x = getPos().x;
-	int y = getPos().y - 20;
+	int y = getPos().y - (getPos().h / 2);
 	updatePos(x, y);
+	setCollider(getCollider().w, getCollider().h + y);
 	hovering = true;
 }
 
 void Card::unhover(){
 	if(!hovering) return;
 	int x = getPos().x;
-	int y = getPos().y + 20;
+	int y = getPos().y + (getPos().h / 2);
 	updatePos(x, y);
+	setCollider(getCollider().w, getCollider().h + y - getPos().y);
 	hovering = false;
 }

@@ -13,7 +13,7 @@ Card* Player::play(Card* card){
 	if(pos >= cards.size()){
 		return NULL;
 	}
-//	std::cout<<"The card is at: "<<pos<<", vector size: "<<cards.size()<<std::endl;
+
 	cards.erase(cards.begin()+pos);
 	std::cout<<name<<" played a "<<card->getColorString()<<" "<<card->getValue()<<std::endl;
 	return card;
@@ -22,17 +22,25 @@ Card* Player::play(Card* card){
 void Player::sortCards(){
 	std::sort(cards.begin(), cards.end());
 
-	int w = 96; 
+	int w = 96;
 	int h = 128;
 	int i = 128;
 	for(Card* card: cards){
+		int temp = i;
 		card->unhover();
 		card->updatePos(i, handLocation);
 		card->resize(w, h);
-		i += w/1.5;
+		i += (w+300)/getCardsNumber();
+		if(card != cards.back()){
+			temp = i - temp;
+			if(temp > w) temp = w;
+			card->setCollider(temp, h);
+		}
 	}
 }
 
 std::string Player::getName(){ return name; }
+
+int Player::getCardsNumber(){ return cards.size(); }
 
 std::vector<Card*> Player::getCards(){ return cards; }

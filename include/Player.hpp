@@ -14,5 +14,6 @@ public:
 	Card* play(Card* card);
 	void sortCards();
 	std::string getName();
+	int getCardsNumber();
 	std::vector<Card*> getCards();
 };

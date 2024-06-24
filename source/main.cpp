@@ -88,7 +88,8 @@ int main(){
 			switch(event.type){
 			case SDL_MOUSEBUTTONDOWN:
 				for(Card* b : playerCards){
-					if(event.button.x >= b->getPos().x && event.button.x <= b->getPos().x + b->getPos().w/1.5 && event.button.y >= b->getPos().y && event.button.y <= b->getPos().y + b->getPos().h){
+					SDL_Rect collider = b->getCollider();
+					if(event.button.x >= collider.x && event.button.x <= collider.x + collider.w && event.button.y >= collider.y && event.button.y <= collider.y + collider.h){
 						cout<<"Selected "<<b->getValue()<<" of "<<b->getColorString()<<" card\n";
 
 						bool valid = game.play(&player1, b);
@@ -105,7 +106,8 @@ int main(){
 				break;
 			case SDL_MOUSEMOTION:
 				for(Card* b : playerCards){
-					if(event.button.x >= b->getPos().x && event.button.x <= b->getPos().x + b->getPos().w/1.5 && event.button.y >= b->getPos().y && event.button.y <= b->getPos().y + b->getPos().h){
+					SDL_Rect collider = b->getCollider();
+					if(event.button.x >= collider.x && event.button.x <= collider.x + collider.w && event.button.y >= collider.y && event.button.y <= collider.y + collider.h){
 							b->hover();
 					}
 					else {
