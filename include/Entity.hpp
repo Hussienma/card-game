@@ -15,6 +15,7 @@ public:
 	SDL_Rect getPos();
 	SDL_Rect getCurrentFrame();
 	SDL_Rect getCollider();
+	bool checkCollision(int x, int y);
 	void setCollider(int w, int h);
 	void updatePos(int x, int y);
 	void resize(float multiplier);

@@ -12,8 +12,12 @@ class RenderWindow{
 	public:
 	RenderWindow(const char* title, int width, int height);
 	SDL_Texture* loadTexture(const char* path);
+
+	int getRefreshRate();
+
 	void render(Entity& entity);
 	void render(std::vector<Card*>& entites);
 	void clear();
 	void display();
+	void cleanUp();
 };

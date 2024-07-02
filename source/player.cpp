@@ -1,4 +1,6 @@
 #include "Player.hpp"
+#include "Constants.h"
+
 #include <algorithm>
 #include <iostream>
 #include <vector>
@@ -22,19 +24,17 @@ Card* Player::play(Card* card){
 void Player::sortCards(){
 	std::sort(cards.begin(), cards.end());
 
-	int w = 96;
-	int h = 128;
 	int i = 128;
 	for(Card* card: cards){
 		int temp = i;
-		card->unhover();
+		card->setHover(false);
 		card->updatePos(i, handLocation);
-		card->resize(w, h);
-		i += (w+300)/getCardsNumber();
+		card->resize(CARD_WIDTH, CARD_HEIGHT);
+		i += (400)/getCardsNumber();
 		if(card != cards.back()){
 			temp = i - temp;
-			if(temp > w) temp = w;
-			card->setCollider(temp, h);
+			if(temp > CARD_WIDTH) temp = CARD_WIDTH;
+			card->setCollider(temp, CARD_HEIGHT);
 		}
 	}
 }

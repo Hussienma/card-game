@@ -23,6 +23,16 @@ SDL_Texture* RenderWindow::loadTexture(const char* path){
 	return texture;
 }
 
+int RenderWindow::getRefreshRate(){
+	int displayIndex = SDL_GetWindowDisplayIndex(window);
+	
+	SDL_DisplayMode mode;
+
+	SDL_GetDisplayMode(displayIndex, 0, &mode);
+
+	return mode.refresh_rate;
+}
+
 void RenderWindow::clear(){
 	SDL_RenderClear(renderer);
 }
@@ -51,3 +61,8 @@ void RenderWindow::render(std::vector<Card*>& entites){
 }
 
 void RenderWindow::display(){ SDL_RenderPresent(renderer); }
+
+void RenderWindow::cleanUp(){
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(window);
+}

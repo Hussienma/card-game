@@ -20,6 +20,11 @@ SDL_Rect Entity::getPos(){ return pos; }
 
 SDL_Rect Entity::getCollider(){ return collider; }
 
+bool Entity::checkCollision(int x, int y){
+	SDL_Rect collider = getCollider();
+	return (x >= collider.x && x <= collider.x + collider.w && y >= collider.y && y <= collider.y + collider.h);
+}
+
 void Entity::setCollider(int w, int h){
 	collider.w = w;
 	collider.h = h;
