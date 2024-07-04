@@ -5,6 +5,7 @@
 Card::Card(Color color, Uint16 value, SDL_Rect pos, SDL_Rect frame, SDL_Texture* tex) : color(color), value(value), Entity(pos, frame, tex){
 
 }
+
 Color Card::getColor(){ return color; }
 
 Uint16 Card::getValue(){ return value; }
@@ -30,6 +31,8 @@ void Card::setHover(bool val){
 	hovering = val;
 }
 
+void Card::setColor(Color color){ this->color = color; }
+
 void Card::animate(){
 	if((hovering && frame == 40) || (!hovering && frame == 0)) return;
 	if(hovering) frame++;
@@ -39,3 +42,11 @@ void Card::animate(){
 	updatePos(x, y);
 	setCollider(getCollider().w, getCollider().h + y);
 }
+
+Color ChangeColorCard::getColor(){ return precievedColor; }
+
+void ChangeColorCard::setColor(Color color){
+	precievedColor = color;
+	std::cout<<"Changed precieved color.\n";
+}
+

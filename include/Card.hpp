@@ -1,6 +1,5 @@
 #pragma once
 #include "Entity.hpp"
-#include "Utils.hpp"
 #include <iostream>
 #include <SDL2/SDL_render.h>
 
@@ -15,15 +14,16 @@ private:
 	void useAbility();
 public:
 	Card(Color color, Uint16 value, SDL_Rect pos, SDL_Rect frame, SDL_Texture* tex);
-	Color getColor();
+	virtual Color getColor();
 	std::string getColorString();
 	Uint16 getValue();
 	void animate();
 	void setHover(bool val);
+	void setColor(Color color);
 };
 
 class ReverseCard: public Card{
-public:
+	public:
 	ReverseCard(Color color, SDL_Rect pos, SDL_Rect frame, SDL_Texture* tex): Card(color, 10, pos, frame, tex){}
 };
 
@@ -33,15 +33,21 @@ class SkipCard: public Card{
 };
 
 class ChangeColorCard: public Card{
+	private:
+	Color precievedColor;
 	public:
-	ChangeColorCard(SDL_Rect pos, SDL_Rect frame, SDL_Texture* tex): Card(WILD, 13, pos, frame, tex){}
+	ChangeColorCard(Uint16 value, SDL_Rect pos, SDL_Rect frame, SDL_Texture* tex): precievedColor(WILD), Card(WILD, value, pos, frame, tex){}
+	Color getColor();
+	void setColor(Color color);
 };
 
 class DrawCardsCard: public Card{
-	private:
-	Uint16 numberOfCards;
 	public:
-	DrawCardsCard(Color color, Uint16 number, SDL_Rect pos, SDL_Rect frame, SDL_Texture* tex): numberOfCards(number), Card(color, 12, pos, frame, tex){}
-	Uint16 getNumberOfCards();
+	DrawCardsCard(Color color, SDL_Rect pos, SDL_Rect frame, SDL_Texture* tex): Card(color, 12, pos, frame, tex){}
+};
+
+class DrawAndChangeColorCard: public ChangeColorCard{
+	public:
+	DrawAndChangeColorCard(SDL_Rect pos, SDL_Rect frame, SDL_Texture* tex):  ChangeColorCard(14, pos, frame, tex){}
 };
 

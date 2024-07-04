@@ -13,7 +13,8 @@ void Player::draw(Card* card){
 Card* Player::play(Card* card){
 	ptrdiff_t pos = std::distance(cards.begin(), std::find(cards.begin(), cards.end(), card));
 	if(pos >= cards.size()){
-		return NULL;
+		std::cout<<"Pos outside of bounds\n";
+		return nullptr;
 	}
 
 	cards.erase(cards.begin()+pos);

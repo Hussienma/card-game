@@ -7,7 +7,7 @@
 #include "LinkedList.hpp"
 #include "Player.hpp"
 
-enum game_state { START, IN_PROGRESS, FINISHED };
+enum gameState { START, TURNS, PICK_COLOR, FINISHED };
 
 class Game{
 private:
@@ -16,14 +16,22 @@ private:
 	std::vector<Card*> field;
 	Player* player;
 	LinkedList turns;
-	game_state state;
+	gameState state;
 	void initializeCards(SDL_Texture* cardsTexture);
+	void draw();
 public:
 	Game(std::vector<Player*>& player, SDL_Texture* cardsTexture);
-	void draw(Player* player);
-	bool play(Player* player, Card* card);
+	void drawAndGoNext();
+	bool play(Card* card);
+	void playReverseCard();
+	void playSkipCard();
+	void playDrawCard(int number);
+	void playChangeColor(Color color);
 	void refillDeck();
+	void setState(gameState state);
 	Card* getCardOnField();
+	Player* getCurrentPlayerTurn();
+	gameState getGameState();
 	void displayCards(std::vector<Card*> cards);
 	void displayPlayerCards(Player* player);
 };
