@@ -1,15 +1,19 @@
 #include "LinkedList.hpp"
 
-LinkedList::LinkedList(Player& p1, Player& p2): head(nullptr), player1(&p1), player2(&p2){
-	head = &player1;
-	insert(&player2);
-}
-
 void LinkedList::insert(Node* p){
+	if(head == nullptr){
+		head = p;
+		return;
+	}
 	p->next = head;
 	p->prev = head;
 	head->next = p;
 	head->prev = p;
+}
+
+void LinkedList::insertPlayer(Player& player){
+	Node* node = new Node(&player);
+	insert(node);
 }
 
 Player* LinkedList::getCurrentTurn(){

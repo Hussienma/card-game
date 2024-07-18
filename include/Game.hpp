@@ -3,24 +3,31 @@
 #include <iostream>
 #include <vector>
 
-#include "Card.hpp"
+#include "GameObject.hpp"
 #include "LinkedList.hpp"
 #include "Player.hpp"
+#include "RenderWindow.hpp"
 
-enum gameState { START, TURNS, PICK_COLOR, FINISHED };
+enum gameState { START, TURNS, PICK_COLOR, FINISHED, QUIT };
 
 class Game{
 private:
+	RenderWindow* window;
+	SDL_Texture* cardsTexture;
+	std::vector<Sprite*> cardsSprites;
 	std::vector<Card> cards;
 	std::vector<Card*> deck;
 	std::vector<Card*> field;
 	Player* player;
+	Player* opponent;
 	LinkedList turns;
-	gameState state;
-	void initializeCards(SDL_Texture* cardsTexture);
+	void initializeCards();
 	void draw();
 public:
-	Game(std::vector<Player*>& player, SDL_Texture* cardsTexture);
+	gameState state;
+	Game(RenderWindow& window);
+	void render();
+	void update();
 	void drawAndGoNext();
 	bool play(Card* card);
 	void playReverseCard();
@@ -28,7 +35,6 @@ public:
 	void playDrawCard(int number);
 	void playChangeColor(Color color);
 	void refillDeck();
-	void setState(gameState state);
 	Card* getCardOnField();
 	Player* getCurrentPlayerTurn();
 	gameState getGameState();

@@ -1,9 +1,10 @@
 #pragma once
-#include "Card.hpp"
 #include "Entity.hpp"
 #include<iostream>
 #include<SDL2/SDL.h>
 #include <vector>
+
+class Card;
 
 class RenderWindow{
 	private:
@@ -16,7 +17,9 @@ class RenderWindow{
 	int getRefreshRate();
 
 	void render(Entity& entity);
-	void render(std::vector<Card*>& entites);
+	void render(SDL_Texture* texture, SDL_Rect src, SDL_Rect dst);
+	void renderPlayer(std::vector<Card*>& entites);
+	void renderOpponent(Entity& card, int numberOfCards);
 	void clear();
 	void display();
 	void cleanUp();

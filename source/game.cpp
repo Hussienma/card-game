@@ -1,39 +1,52 @@
 #include "Game.hpp"
-#include "Card.hpp"
+#include "Constants.h"
+#include "GameObject.hpp"
 #include "LinkedList.hpp"
+#include <SDL2/SDL_events.h>
 #include <SDL2/SDL_render.h>
 #include <cstdlib>
 #include <string>
 
-Game::Game(std::vector<Player*>& players, SDL_Texture* cardsTexture): state(START), turns(*players[0], *players[1]){
-	initializeCards(cardsTexture);
-	player = players[0];
-	for(int i=0; i<cards.size(); i++){
+Game::Game(RenderWindow& window): window(&window), state(START){
+	cardsTexture = window.loadTexture("./gfx/Cards.png");
+	initializeCards();
+	player = new Player("p1", new InputComponent());
+	opponent = new Player("p2", new InputComponent());
+	for(Uint16 i=0; i<cards.size(); i++){
 		deck.push_back(&cards[i]);
 	}
+
+	turns.insertPlayer(*player);
+	turns.insertPlayer(*opponent);
 
 	for(int i=0; i<20; ++i){
 		draw();
 		turns.goNext();
 	}
-	players[0]->sortCards();
-	players[1]->sortCards();
+	player->sortCards();
 
 	state = TURNS;
 }
 
-void Game::initializeCards(SDL_Texture* cardsTexture){
+void Game::render(){
+	for(Card card: cards){
+		card.render();
+	}
+}
+
+
+// TODO: We might wanna move the input handling inside the InputComponent rather than here
+void Game::update(){
+	Player* player = turns.getCurrentTurn();
+	player->update(*this);
+}
+
+void Game::initializeCards(){
 	Color color;
 	SDL_Rect frame;
 	frame.x = 0;
 	frame.w = 192;
 	frame.h = 256;
-
-	SDL_Rect pos;
-	pos.x = 0;
-	pos.y = 0;
-	pos.w = 96;
-	pos.h = 128;
 
 	for(int i=0; i<4; ++i){
 		switch(i){
@@ -44,28 +57,35 @@ void Game::initializeCards(SDL_Texture* cardsTexture){
 		}
 		frame.y = i*256;
 		frame.x = 0;
-		cards.push_back(Card(color, 0, pos, frame, cardsTexture));
+
+		cards.push_back(Card(NUMBER, color, 0, new GraphicsComponent(window, new Sprite(cardsTexture, frame))));
 
 		frame.x = 192;
 		for(int j=1; j<10; ++j){
-			Card card = Card(color, j, pos, frame, cardsTexture);
+			Card card = Card(NUMBER, color, j, new GraphicsComponent(window, new Sprite(cardsTexture, frame)));
 			cards.push_back(card);
 			cards.push_back(card);
 			frame.x += 192;
 		}
 
 		for(int j=0; j<2; ++j){
-			cards.push_back(ReverseCard(color, pos, frame, cardsTexture));
+			cards.push_back(
+				Card(REVERSE, color, 10, new GraphicsComponent(window, new Sprite(cardsTexture, frame)))
+			);
 		}
 
 		frame.x += 192;
 		for(int j=0; j<2; ++j){
-			cards.push_back(DrawCardsCard(color, pos, frame, cardsTexture));
+			cards.push_back(
+				Card(DRAW_2, color, 11, new GraphicsComponent(window, new Sprite(cardsTexture, frame)))
+			);
 		}
 
 		frame.x += 192;
 		for(int j=0; j<2; ++j){
-			cards.push_back(SkipCard(color, pos, frame, cardsTexture));
+			cards.push_back(
+				Card(SKIP, color, 12, new GraphicsComponent(window, new Sprite(cardsTexture, frame)))
+			);
 		}
 	}
 
@@ -73,12 +93,16 @@ void Game::initializeCards(SDL_Texture* cardsTexture){
 	frame.x += 192;
 	frame.y = 0;
 	for(int i=0; i<4; ++i)
-		cards.push_back(ChangeColorCard(13, pos, frame, cardsTexture));
+		cards.push_back(
+			Card(WILD, color, 13, new GraphicsComponent(window, new Sprite(cardsTexture, frame)))
+		);
 
 	// WILD +4 cards
 	frame.y = 256;
 	for(int i=0; i<4; ++i)
-		cards.push_back(DrawAndChangeColorCard(pos, frame, cardsTexture));
+		cards.push_back(
+			Card(DRAW_4, color, 14, new GraphicsComponent(window, new Sprite(cardsTexture, frame)))
+		);
 }
 
 void Game::draw(){
@@ -108,6 +132,8 @@ void Game::drawAndGoNext(){
 }
 
 bool Game::play(Card* card){
+	// TODO: Refactor this whole mess DONE??
+	/*
 	if(field.size() > 0 && field.back()->getColor() == WILD){
 		ChangeColorCard c = *(ChangeColorCard*)field.back();
 		if(c.getColor() != card->getColor()){
@@ -115,11 +141,17 @@ bool Game::play(Card* card){
 			return false;
 		}
 	}
+	*/
 
-	else if(field.size() > 0 
-		&& card->getColor() != WILD 
-		&& field.back()->getColor() != card->getColor()
-		&& field.back()->getValue() != card->getValue()){
+	// WARNING: Playing with fire here
+	Card* cardOnField = nullptr;
+	if(field.size() > 0)
+		cardOnField = field.back(); 
+
+	if(cardOnField != nullptr 
+		&& card->getValue() < 13 
+		&& cardOnField->getColor() != card->getColor()
+		&& cardOnField->getValue() != card->getValue()){
 		std::cerr<<"Invalid play: card isn't the same color or number.\n";
 		return false;
 	}
@@ -132,24 +164,21 @@ bool Game::play(Card* card){
 		return false;
 	}
 
-	switch (play->getValue()) {
-		case 10:
+	switch (card->getType()) {
+		case REVERSE:
 			playReverseCard();
 			break;
-		case 11:
+		case SKIP:
 			playSkipCard();
 			break;
-		case 12: {
+		case DRAW_2: 
 			playDrawCard(2);
 			break;
-		}
-		case 13: 
+		case DRAW_4: 
+			playDrawCard(4);
+		case WILD: 
 			playChangeColor(card->getColor());
 			break;
-		case 14: {
-			playDrawCard(4);
-			break;
-		}
 		default:
 			std::cout<<"Played a number card.\n";
 	}
@@ -191,10 +220,6 @@ void Game::refillDeck(){
 		deck.push_back(field.front());
 		field.erase(field.begin());
 	}
-}
-
-void Game::setState(gameState state){
-	this->state = state;
 }
 
 Card* Game::getCardOnField(){ return field.back(); }

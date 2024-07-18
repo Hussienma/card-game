@@ -3,13 +3,13 @@
 #include <SDL2/SDL_image.h>
 
 class Entity{
-private:
+	private:
 	SDL_Rect pos;
 	SDL_Rect currentFrame;
 	SDL_Texture* texture;
 	SDL_Rect collider;
 	
-public:
+	public:
 	Entity(SDL_Rect position, SDL_Rect frame, SDL_Texture* tex);
 	SDL_Texture* getTexture();
 	SDL_Rect getPos();

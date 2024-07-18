@@ -1,14 +1,10 @@
+#include <iostream>
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_render.h>
-#include <iostream>
 #include <SDL2/SDL.h>
-#include <string>
-#include <vector>
 
 #include "RenderWindow.hpp"
-#include "Card.hpp"
-#include "Player.hpp"
 #include "Game.hpp"
 #include "Utils.hpp"
 
@@ -20,41 +16,14 @@ int main(){
 	
 	RenderWindow window("Game window", 640, 480);
 
-	SDL_Event event;
-	bool gameRunning = true;
-
-	SDL_Rect pos;
-	pos.x = 0;
-	pos.y = 368;
-	pos.w = 96;
-	pos.h = 128;
-
-	Player player1("p1", pos.y);
-	Player player2("p2", pos.y);
-	std::vector<Player*> players;
-	players.push_back(&player1);
-	players.push_back(&player2);
-
-	SDL_Texture* cardsTexture = window.loadTexture("./gfx/Cards.png");
-	SDL_Texture* colorWheelTexture = window.loadTexture("./gfx/Color Selection Wheel.png");
-
-	SDL_Rect colorWheelPos;
-	colorWheelPos.x = 0;
-	colorWheelPos.y = 0;
-	colorWheelPos.w = 256;
-	colorWheelPos.h = 256;
-	Entity colorWheel(colorWheelPos, colorWheelPos, colorWheelTexture);
-	Game game(players, cardsTexture);
-	Card* cardOnField = nullptr;
-
-	std::vector<Card*> playerCards = player1.getCards();
+	Game game(window);
 
 	const float timeStep = 0.01f;
 
 	float accumulator = 0.0f;
 	float currentTime = utils::hireTimeInSeconds();
 
-	while(gameRunning){
+	while(game.getGameState() != QUIT){
 		int startTicks = SDL_GetTicks();
 
 		float newTime = utils::hireTimeInSeconds();
@@ -63,11 +32,9 @@ int main(){
 		currentTime = newTime;
 		accumulator += frameTime;
 
-		gameState state = game.getGameState();
-
 		while(accumulator >= timeStep){
-		while(SDL_PollEvent(&event))
-			switch(event.type){
+			game.update();
+			/*
 			case SDL_MOUSEBUTTONDOWN:
 				if(state == TURNS){
 					for(Card* b : playerCards){
@@ -83,6 +50,7 @@ int main(){
 								player1.sortCards();
 								playerCards = player1.getCards();
 							}
+
 							break;
 						}
 					}
@@ -95,6 +63,7 @@ int main(){
 						game.setState(TURNS);
 					}
 				}
+
 				break;
 			case SDL_MOUSEMOTION:
 				if(state == TURNS){
@@ -115,25 +84,14 @@ int main(){
 					player1.sortCards();
 					playerCards = player1.getCards();
 				}
-				break;
-			case SDL_QUIT:
-				gameRunning = false;
-			}
 
-				for(Card* b : playerCards){
-					b->animate();
-				}
+				break;
+			*/
 				accumulator -= timeStep;
 		}
 
-
 		window.clear();
-		if(cardOnField != nullptr)
-			window.render(*cardOnField);
-
-		if(state == PICK_COLOR)
-			window.render(colorWheel);
-		window.render(playerCards);
+		game.render();
 		window.display();
 
 		int frameTicks = SDL_GetTicks() - startTicks;

@@ -5,6 +5,31 @@
 #include <iostream>
 #include <vector>
 
+/*
+Card* Player::handleInput(SDL_Event& event){
+	Card* result = nullptr;
+	int x = event.button.x;
+	int y = event.button.y;
+
+	for(int i=cards.size(); i>=0; --i){
+		Card* card = cards[i];
+		if(card->checkCollision(x, y)){
+			std::cout<<"Hit a "<<card->getColorString()<<" of "<<card->getValue()<<std::endl;
+			result = card;
+			break;
+		}
+	}
+	return result;
+}
+*/
+
+void Player::update(Game& game){
+	input->update(game, *this);
+	for(Card* card: cards){
+		card->update();
+	}
+}
+
 void Player::draw(Card* card){
 	cards.push_back(card);
 	std::cout<<name<<" drew a "<<card->getColorString()<<" "<<card->getValue()<<std::endl;
@@ -28,15 +53,14 @@ void Player::sortCards(){
 	int i = 128;
 	for(Card* card: cards){
 		int temp = i;
-		card->setHover(false);
-		card->updatePos(i, handLocation);
-		card->resize(CARD_WIDTH, CARD_HEIGHT);
+		card->hover = false;
+		card->position.x = i;
+		// INFO: the y position was set to hand position
+		card->position.y = handLocation;
+
+		card->position.w = CARD_WIDTH;
+		card->position.h = CARD_HEIGHT;
 		i += (400)/getCardsNumber();
-		if(card != cards.back()){
-			temp = i - temp;
-			if(temp > CARD_WIDTH) temp = CARD_WIDTH;
-			card->setCollider(temp, CARD_HEIGHT);
-		}
 	}
 }
 

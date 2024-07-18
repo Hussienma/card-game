@@ -1,15 +1,19 @@
 #pragma once
-#include "Card.hpp"
+#include "GameObject.hpp"
 #include <vector>
 
 class Player{
 private:
-	Uint16 size;
+	Uint16 size = 0;
 	std::vector<Card*> cards;
 	std::string name;
 	int handLocation;
+	InputComponent* input;
 public:
-	Player(std::string name, int location) : name(name), handLocation(location), size(0){}
+	Player() : name(" "){}
+	Player(std::string name) : name(name){}
+	Player(std::string name, InputComponent* input) : name(name), input(input){}
+	void update(Game& game);
 	void draw(Card* card);
 	Card* play(Card* card);
 	void sortCards();

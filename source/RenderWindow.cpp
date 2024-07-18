@@ -4,7 +4,6 @@
 #include <SDL2/SDL_video.h>
 #include <iostream>
 #include <SDL2/SDL.h>
-#include <vector>
 
 #include "RenderWindow.hpp"
 #include "Entity.hpp"
@@ -55,9 +54,25 @@ void RenderWindow::render(Entity& entity){
 	SDL_RenderCopy(renderer, texture, &src, &dst);
 }
 
-void RenderWindow::render(std::vector<Card*>& entites){
-	for(Entity* entity: entites)
-		render(*entity);
+void RenderWindow::render(SDL_Texture* texture, SDL_Rect frame, SDL_Rect pos){
+	SDL_Rect src;
+	src.x = frame.x;
+	src.y = frame.y;
+	src.w = frame.w;
+	src.h = frame.h;
+
+	SDL_Rect dst;
+	dst.x = pos.x;
+	dst.y = pos.y;
+	dst.w = pos.w;
+	dst.h = pos.h;
+	
+	SDL_RenderCopy(renderer, texture, &src, &dst);
+}
+
+void RenderWindow::renderOpponent(Entity& card,int numberOfCards){
+	for(int i=numberOfCards; i>=0; --i)
+		render(card);
 }
 
 void RenderWindow::display(){ SDL_RenderPresent(renderer); }
