@@ -37,7 +37,7 @@ void InputComponent::update(Game& game, Player& player){
 				}
 				break;
 			}
-				case SDL_QUIT:
+			case SDL_QUIT:
 				game.state = QUIT;
 				break;
 		}
