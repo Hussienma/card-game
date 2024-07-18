@@ -7,7 +7,7 @@ private:
 	Uint16 size = 0;
 	std::vector<Card*> cards;
 	std::string name;
-	int handLocation;
+	int handLocation = 352;
 	InputComponent* input;
 public:
 	Player() : name(" "){}

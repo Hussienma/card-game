@@ -1,8 +1,8 @@
 #pragma once
 #include "Constants.h"
 #include "RenderWindow.hpp"
+#include "Utils.hpp"
 #include <SDL2/SDL.h>
-#include <fmtmsg.h>
 
 enum Color { RED, YELLOW, GREEN, BLUE, BLACK };
 enum CardType { NUMBER, DRAW_2, DRAW_4, WILD, REVERSE, SKIP };
@@ -26,11 +26,19 @@ public:
   virtual void render();
 };
 
+struct Animation {
+	int currentFrame = 0;
+	int totalFrames;
+	Animation(): totalFrames(20){}
+	Animation(int frames): totalFrames(frames){}
+};
+
 class Card : public GameObject {
 private:
   CardType type;
   Color color;
   int value;
+  Animation hoverAnimation;
 
 public:
   bool hover = false;
@@ -42,6 +50,7 @@ public:
     position.w = CARD_WIDTH;
     position.h = CARD_HEIGHT;
   }
+virtual void update();
   Color getColor() { return color; }
   std::string getColorString() {
     switch (color) {
@@ -98,6 +107,7 @@ struct Sprite {
   Sprite(SDL_Texture *texture, SDL_Rect frame)
       : texture(texture), frame(frame) {}
 };
+
 
 class GraphicsComponent {
 private:

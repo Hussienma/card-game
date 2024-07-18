@@ -24,6 +24,7 @@ Game::Game(RenderWindow& window): window(&window), state(START){
 		turns.goNext();
 	}
 	player->sortCards();
+	opponent->sortCards();
 
 	state = TURNS;
 }
@@ -39,6 +40,8 @@ void Game::render(){
 void Game::update(){
 	Player* player = turns.getCurrentTurn();
 	player->update(*this);
+	
+	// INFO: Do all the rendering here
 }
 
 void Game::initializeCards(){
@@ -124,6 +127,7 @@ void Game::draw(){
 	Card* card = deck[pos];
 	deck.erase(deck.begin()+pos);
 	player->draw(card);
+	player->sortCards();
 }
 
 void Game::drawAndGoNext(){
@@ -186,6 +190,7 @@ bool Game::play(Card* card){
 	turns.goNext();
 	field.push_back(card);
 
+	player->sortCards();
 	return true;
 }
 

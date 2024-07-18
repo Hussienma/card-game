@@ -5,24 +5,6 @@
 #include <iostream>
 #include <vector>
 
-/*
-Card* Player::handleInput(SDL_Event& event){
-	Card* result = nullptr;
-	int x = event.button.x;
-	int y = event.button.y;
-
-	for(int i=cards.size(); i>=0; --i){
-		Card* card = cards[i];
-		if(card->checkCollision(x, y)){
-			std::cout<<"Hit a "<<card->getColorString()<<" of "<<card->getValue()<<std::endl;
-			result = card;
-			break;
-		}
-	}
-	return result;
-}
-*/
-
 void Player::update(Game& game){
 	input->update(game, *this);
 	for(Card* card: cards){
@@ -31,6 +13,7 @@ void Player::update(Game& game){
 }
 
 void Player::draw(Card* card){
+	card->position.x = handLocation;
 	cards.push_back(card);
 	std::cout<<name<<" drew a "<<card->getColorString()<<" "<<card->getValue()<<std::endl;
 }

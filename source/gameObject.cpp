@@ -6,6 +6,18 @@ void GameObject::update(){
 //	std::cout<<"GameObject update method\n";
 }
 
+void Card::update(){
+	if(hover && hoverAnimation.currentFrame < hoverAnimation.totalFrames)
+		hoverAnimation.currentFrame++;
+	else if(!hover && hoverAnimation.currentFrame > 0)
+		hoverAnimation.currentFrame--;
+
+	float changeRate = (float)hoverAnimation.currentFrame/hoverAnimation.totalFrames;
+	position.y = utils::lerp(352, 312, changeRate);
+
+	render();
+}
+
 void GameObject::render(){
 	graphics->update(*this);
 }
@@ -19,6 +31,7 @@ void InputComponent::update(Game& game, Player& player){
 					Card* card = player.getCards().at(i);
 					if(card->checkCollision(event.button.x, event.button.y)){
 						std::cout<<"Clicked on "<<card->to_string()<<std::endl;
+						game.play(card);
 						break;
 					}
 				}
@@ -28,7 +41,6 @@ void InputComponent::update(Game& game, Player& player){
 				for(int i=player.getCards().size()-1; i>=0; --i){
 					Card* card = player.getCards().at(i);
 					if(!foundHover && card->checkCollision(event.button.x, event.button.y)){
-						std::cout<<"Hovering on "<<card->to_string()<<std::endl;
 						card->hover = true;
 						foundHover = true;
 					} else {
@@ -37,6 +49,11 @@ void InputComponent::update(Game& game, Player& player){
 				}
 				break;
 			}
+			case SDL_KEYDOWN:
+				if(event.key.keysym.sym == SDLK_SPACE){
+					game.drawAndGoNext();
+				}
+				break;
 			case SDL_QUIT:
 				game.state = QUIT;
 				break;
