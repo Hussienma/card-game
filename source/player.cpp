@@ -14,6 +14,8 @@ void Player::update(Game& game){
 
 void Player::draw(Card* card){
 	card->position.x = handLocation;
+	card->position.w = CARD_WIDTH;
+	card->position.h = CARD_HEIGHT;
 	cards.push_back(card);
 	std::cout<<name<<" drew a "<<card->getColorString()<<" "<<card->getValue()<<std::endl;
 }

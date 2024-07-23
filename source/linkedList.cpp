@@ -24,16 +24,13 @@ Player* LinkedList::getCurrentTurn(){
 void LinkedList::goNext(){
 	Node* newHead = head->next;
 	head = newHead;
-	std::cout<<getCurrentTurn()->getName()<<" turn now.\n";
 }
 
 void LinkedList::reverseTurns(){
 	Node* node = head->next;
 	for(int i=0; i < 2; ++i){
 		Node* temp = node->next;
-		std::cout<<"temp="<<temp<<std::endl;
 		node->next = node->prev;
-		std::cout<<"temp="<<temp<<std::endl;
 		node->prev = temp;
 		node = node->next;
 	}

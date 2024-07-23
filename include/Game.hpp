@@ -1,19 +1,22 @@
 #pragma once
 #include <SDL2/SDL_render.h>
-#include <iostream>
 #include <vector>
+#include <iostream>
+#include <map>
 
+#include "Index.hpp"
 #include "GameObject.hpp"
 #include "LinkedList.hpp"
 #include "Player.hpp"
 #include "RenderWindow.hpp"
 
-enum gameState { START, TURNS, PICK_COLOR, FINISHED, QUIT };
+enum GameState { START, TURNS, PICK_COLOR, FINISHED, QUIT };
 
 class Game{
 private:
 	RenderWindow* window;
-	SDL_Texture* cardsTexture;
+	std::map<std::string, SDL_Texture*> textures;
+	std::map<std::string, UI*> UIs;
 	std::vector<Sprite*> cardsSprites;
 	std::vector<Card> cards;
 	std::vector<Card*> deck;
@@ -21,10 +24,14 @@ private:
 	Player* player;
 	Player* opponent;
 	LinkedList turns;
+	Sprite* cardBack;
+	bool playedWildCard = false;
+	void initializeTextures();
 	void initializeCards();
+	void initializeUIs();
 	void draw();
 public:
-	gameState state;
+	GameState state;
 	Game(RenderWindow& window);
 	void render();
 	void update();
@@ -37,7 +44,8 @@ public:
 	void refillDeck();
 	Card* getCardOnField();
 	Player* getCurrentPlayerTurn();
-	gameState getGameState();
+	GameState getGameState();
 	void displayCards(std::vector<Card*> cards);
 	void displayPlayerCards(Player* player);
+	void cleanUp();
 };

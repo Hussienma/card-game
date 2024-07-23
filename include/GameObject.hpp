@@ -1,21 +1,14 @@
 #pragma once
 #include "Constants.h"
-#include "RenderWindow.hpp"
 #include "Utils.hpp"
+#include "RenderWindow.hpp"
+#include "UI.hpp"
 #include <SDL2/SDL.h>
-
-enum Color { RED, YELLOW, GREEN, BLUE, BLACK };
-enum CardType { NUMBER, DRAW_2, DRAW_4, WILD, REVERSE, SKIP };
-enum CardState { IN_DECK, IN_HAND, PLAYED };
-
-class GraphicsComponent;
-class InputComponent;
 
 class GameObject {
 private:
-  GraphicsComponent *graphics;
-
 public:
+  GraphicsComponent *graphics;
   GameObject(GraphicsComponent *graphics) : graphics(graphics) {}
   SDL_Rect position;
   bool checkCollision(int x, int y) {
@@ -29,7 +22,7 @@ public:
 struct Animation {
 	int currentFrame = 0;
 	int totalFrames;
-	Animation(): totalFrames(20){}
+	Animation(): totalFrames(40){}
 	Animation(int frames): totalFrames(frames){}
 };
 
@@ -52,6 +45,7 @@ public:
   }
 virtual void update();
   Color getColor() { return color; }
+  void setColor(Color val){ color = val; }
   std::string getColorString() {
     switch (color) {
     case YELLOW:
@@ -108,7 +102,6 @@ struct Sprite {
       : texture(texture), frame(frame) {}
 };
 
-
 class GraphicsComponent {
 private:
   RenderWindow *window;
@@ -124,16 +117,9 @@ public:
   virtual void update(Card &card) {
     std::cout << "Rendering " << card.getColorString() << " of "
               << card.getValue() << std::endl;
-    window->render(sprite->texture, card.position, sprite->frame);
+    window->render(sprite->texture, sprite->frame, card.position);
   }
+
+  virtual void update(UI& ui);
 };
 
-class Player;
-class Game;
-
-class InputComponent {
-private:
-public:
-  InputComponent() {}
-  virtual void update(Game &game, Player &player);
-};

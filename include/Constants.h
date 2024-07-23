@@ -1,2 +1,4 @@
-#define CARD_HEIGHT 128
+#define WINDOW_WIDTH 640
+#define WINDOW_HEIGHT 480
 #define CARD_WIDTH 92
+#define CARD_HEIGHT 128

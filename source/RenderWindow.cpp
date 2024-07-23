@@ -36,24 +36,6 @@ void RenderWindow::clear(){
 	SDL_RenderClear(renderer);
 }
 
-void RenderWindow::render(Entity& entity){
-	SDL_Rect src;
-	src.x = entity.getCurrentFrame().x;
-	src.y = entity.getCurrentFrame().y;
-	src.w = entity.getCurrentFrame().w;
-	src.h = entity.getCurrentFrame().h;
-
-	SDL_Rect dst;
-	dst.x = entity.getPos().x;
-	dst.y = entity.getPos().y;
-	dst.w = entity.getPos().w;
-	dst.h = entity.getPos().h;
-
-	SDL_Texture* texture = entity.getTexture();
-
-	SDL_RenderCopy(renderer, texture, &src, &dst);
-}
-
 void RenderWindow::render(SDL_Texture* texture, SDL_Rect frame, SDL_Rect pos){
 	SDL_Rect src;
 	src.x = frame.x;
@@ -68,11 +50,6 @@ void RenderWindow::render(SDL_Texture* texture, SDL_Rect frame, SDL_Rect pos){
 	dst.h = pos.h;
 	
 	SDL_RenderCopy(renderer, texture, &src, &dst);
-}
-
-void RenderWindow::renderOpponent(Entity& card,int numberOfCards){
-	for(int i=numberOfCards; i>=0; --i)
-		render(card);
 }
 
 void RenderWindow::display(){ SDL_RenderPresent(renderer); }

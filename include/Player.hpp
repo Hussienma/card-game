@@ -1,5 +1,6 @@
 #pragma once
 #include "GameObject.hpp"
+#include "Index.hpp"
 #include <vector>
 
 class Player{

@@ -1,5 +1,5 @@
 #pragma once
-#include "Player.hpp"
+#include "Index.hpp"
 
 struct Node {
 	Node* prev;
@@ -20,7 +20,6 @@ class LinkedList {
 
 	public:
 	LinkedList(): head(nullptr){
-		std::cout<<"We are in turns construct\n";
 	}
 	void insertPlayer(Player& player);
 	Player* getCurrentTurn();

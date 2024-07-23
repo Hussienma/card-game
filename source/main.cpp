@@ -35,10 +35,10 @@ int main(){
 		while(accumulator >= timeStep){
 			window.clear();
 			game.update();
+			window.display();
 			accumulator -= timeStep;
 		}
 
-		window.display();
 
 		int frameTicks = SDL_GetTicks() - startTicks;
 

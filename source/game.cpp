@@ -7,11 +7,16 @@
 #include <cstdlib>
 #include <string>
 
+// TODO: 1. Create a map<string, UI> and load all the textures for them
+// 2. To decide who will handle the input use GameState
+// 3. In case the game state is "SELECT_COLOR" let the wheel handle the input and change the color accordingly.
+
 Game::Game(RenderWindow& window): window(&window), state(START){
-	cardsTexture = window.loadTexture("./gfx/Cards.png");
+	initializeTextures();
 	initializeCards();
-	player = new Player("p1", new InputComponent());
-	opponent = new Player("p2", new InputComponent());
+	initializeUIs();
+	player = new Player("p1", new PlayerInputComponent());
+	opponent = new Player("p2", new PlayerInputComponent());
 	for(Uint16 i=0; i<cards.size(); i++){
 		deck.push_back(&cards[i]);
 	}
@@ -30,18 +35,43 @@ Game::Game(RenderWindow& window): window(&window), state(START){
 }
 
 void Game::render(){
-	for(Card card: cards){
-		card.render();
+	if(field.size() > 0)
+		field.back()->render();
+	SDL_Rect oppHandLocation;
+	oppHandLocation.x = 128;
+	oppHandLocation.y = 0;
+	oppHandLocation.w = CARD_WIDTH;
+	oppHandLocation.h = CARD_HEIGHT;
+	for(Card* card: opponent->getCards()){
+		window->render(cardBack->texture, cardBack->frame, oppHandLocation);
+		oppHandLocation.x += 400/opponent->getCardsNumber();
 	}
+
+	// INFO: Rendering UI
+//	UIs["color wheel"]->render();
 }
 
-
-// TODO: We might wanna move the input handling inside the InputComponent rather than here
 void Game::update(){
-	Player* player = turns.getCurrentTurn();
-	player->update(*this);
+	switch(state){
+		case TURNS: {
+			Player* player = turns.getCurrentTurn();
+			player->update(*this);
+			break;
+		}
+		case PICK_COLOR:
+			UIs["color wheel"]->update(*this);
+			break;
+		default:
+			break;
+	}
 	
 	// INFO: Do all the rendering here
+	render();
+}
+
+void Game::initializeTextures(){
+	textures["cards"] = window->loadTexture("./gfx/Cards.png");
+	textures["color wheel"] = window->loadTexture("./gfx/Color Wheel.png");
 }
 
 void Game::initializeCards(){
@@ -61,11 +91,11 @@ void Game::initializeCards(){
 		frame.y = i*256;
 		frame.x = 0;
 
-		cards.push_back(Card(NUMBER, color, 0, new GraphicsComponent(window, new Sprite(cardsTexture, frame))));
+		cards.push_back(Card(NUMBER, color, 0, new GraphicsComponent(window, new Sprite(textures["cards"], frame))));
 
 		frame.x = 192;
 		for(int j=1; j<10; ++j){
-			Card card = Card(NUMBER, color, j, new GraphicsComponent(window, new Sprite(cardsTexture, frame)));
+			Card card = Card(NUMBER, color, j, new GraphicsComponent(window, new Sprite(textures["cards"], frame)));
 			cards.push_back(card);
 			cards.push_back(card);
 			frame.x += 192;
@@ -73,21 +103,21 @@ void Game::initializeCards(){
 
 		for(int j=0; j<2; ++j){
 			cards.push_back(
-				Card(REVERSE, color, 10, new GraphicsComponent(window, new Sprite(cardsTexture, frame)))
+				Card(REVERSE, color, 10, new GraphicsComponent(window, new Sprite(textures["cards"], frame)))
 			);
 		}
 
 		frame.x += 192;
 		for(int j=0; j<2; ++j){
 			cards.push_back(
-				Card(DRAW_2, color, 11, new GraphicsComponent(window, new Sprite(cardsTexture, frame)))
+				Card(DRAW_2, color, 11, new GraphicsComponent(window, new Sprite(textures["cards"], frame)))
 			);
 		}
 
 		frame.x += 192;
 		for(int j=0; j<2; ++j){
 			cards.push_back(
-				Card(SKIP, color, 12, new GraphicsComponent(window, new Sprite(cardsTexture, frame)))
+				Card(SKIP, color, 12, new GraphicsComponent(window, new Sprite(textures["cards"], frame)))
 			);
 		}
 	}
@@ -97,15 +127,28 @@ void Game::initializeCards(){
 	frame.y = 0;
 	for(int i=0; i<4; ++i)
 		cards.push_back(
-			Card(WILD, color, 13, new GraphicsComponent(window, new Sprite(cardsTexture, frame)))
+			Card(WILD, color, 13, new GraphicsComponent(window, new Sprite(textures["cards"], frame)))
 		);
 
 	// WILD +4 cards
 	frame.y = 256;
 	for(int i=0; i<4; ++i)
 		cards.push_back(
-			Card(DRAW_4, color, 14, new GraphicsComponent(window, new Sprite(cardsTexture, frame)))
+			Card(DRAW_4, color, 14, new GraphicsComponent(window, new Sprite(textures["cards"], frame)))
 		);
+
+	frame.y += 256;
+	cardBack = new Sprite(textures["cards"], frame);
+}
+
+void Game::initializeUIs(){
+	SDL_Rect position, frame;
+	frame.x = frame.y = 0;
+	frame.h = frame.w = 256;
+	position.x = (WINDOW_WIDTH - frame.w)/2;
+	position.y = (WINDOW_HEIGHT - frame.h)/2;
+	position.h = position.w = 256;
+	UIs["color wheel"] = new ColorWheel(position, new GraphicsComponent(window, new Sprite(textures["color wheel"], frame)), new UIInputComponent());
 }
 
 void Game::draw(){
@@ -136,23 +179,18 @@ void Game::drawAndGoNext(){
 }
 
 bool Game::play(Card* card){
-	// TODO: Refactor this whole mess DONE??
-	/*
-	if(field.size() > 0 && field.back()->getColor() == WILD){
-		ChangeColorCard c = *(ChangeColorCard*)field.back();
-		if(c.getColor() != card->getColor()){
-			std::cerr<<"Invalid play: current color is: "<<c.getColor()<<std::endl;
-			return false;
-		}
-	}
-	*/
-
-	// WARNING: Playing with fire here
 	Card* cardOnField = nullptr;
 	if(field.size() > 0)
 		cardOnField = field.back(); 
 
-	if(cardOnField != nullptr 
+	ColorWheel* wheel = (ColorWheel*)UIs["color wheel"];
+
+	if(playedWildCard && wheel->selectedColor != card->getColor()){
+		std::cerr<<"Invalid play: card isn't the chosen color.\n";
+		return false;
+	}
+
+	else if(!playedWildCard && cardOnField != nullptr 
 		&& card->getValue() < 13 
 		&& cardOnField->getColor() != card->getColor()
 		&& cardOnField->getValue() != card->getValue()){
@@ -167,6 +205,8 @@ bool Game::play(Card* card){
 		std::cerr<<"Invalid play: "<<player->getName()<<" does not have that card!\n";
 		return false;
 	}
+
+	if(playedWildCard) playedWildCard = false;
 
 	switch (card->getType()) {
 		case REVERSE:
@@ -188,9 +228,17 @@ bool Game::play(Card* card){
 	}
 
 	turns.goNext();
+	card->hover = false;
+	card->position.x = (640-card->position.w/2)/2;
+	card->position.y = (480-card->position.h/2)/2;
+	card->position.w /=2;
+	card->position.h /=2;
+
 	field.push_back(card);
 
 	player->sortCards();
+	std::cout<<"game state is: "<<state<<std::endl;
+	std::cout<<"Is the wheel visible: "<<wheel->visible<<std::endl;
 	return true;
 }
 
@@ -198,7 +246,7 @@ void Game::playReverseCard(){
 	std::cout<<"Played reverse card\n";
 	turns.reverseTurns();
 
-	// INFO: This should only be here for 2 players
+	// WARNING: This should only be here for 2 players
 	turns.goNext();
 }
 
@@ -216,6 +264,9 @@ void Game::playDrawCard(int number){
 
 void Game::playChangeColor(Color color){
 	std::cout<<"Played wild card\n";
+	playedWildCard = true;
+	UIs["color wheel"]->visible = true;
+	state = PICK_COLOR;
 }
 
 void Game::refillDeck(){
@@ -231,7 +282,7 @@ Card* Game::getCardOnField(){ return field.back(); }
 
 Player* Game::getCurrentPlayerTurn(){ return turns.getCurrentTurn(); }
 
-gameState Game::getGameState(){ return state; }
+GameState Game::getGameState(){ return state; }
 
 void Game::displayCards(std::vector<Card*> cards){
 	for(Card* card : cards)
