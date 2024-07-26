@@ -6,13 +6,11 @@
 #include <SDL2/SDL.h>
 
 #include "RenderWindow.hpp"
-#include "Entity.hpp"
 
 RenderWindow::RenderWindow(const char* title, int width, int height){
 	window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN);
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 	SDL_SetRenderDrawColor(renderer, 240, 240, 240, 1);
-	
 }
 
 SDL_Texture* RenderWindow::loadTexture(const char* path){
@@ -20,6 +18,10 @@ SDL_Texture* RenderWindow::loadTexture(const char* path){
 	if(texture == NULL)
 		std::cerr<<"Error loading texture at '"<<path<<"': "<<SDL_GetError()<<std::endl;
 	return texture;
+}
+
+SDL_Texture* RenderWindow::loadTextureFromSurface(SDL_Surface* surface){
+	return SDL_CreateTextureFromSurface(renderer, surface);
 }
 
 int RenderWindow::getRefreshRate(){
@@ -32,27 +34,27 @@ int RenderWindow::getRefreshRate(){
 	return mode.refresh_rate;
 }
 
+void RenderWindow::changeTextureColor(SDL_Texture* texture, Uint8 r, Uint8 g, Uint8 b){
+	SDL_SetTextureColorMod(texture, r, g, b);
+}
+
 void RenderWindow::clear(){
 	SDL_RenderClear(renderer);
 }
 
-void RenderWindow::render(SDL_Texture* texture, SDL_Rect frame, SDL_Rect pos){
-	SDL_Rect src;
-	src.x = frame.x;
-	src.y = frame.y;
-	src.w = frame.w;
-	src.h = frame.h;
-
-	SDL_Rect dst;
-	dst.x = pos.x;
-	dst.y = pos.y;
-	dst.w = pos.w;
-	dst.h = pos.h;
-	
+void RenderWindow::render(SDL_Texture* texture, SDL_Rect src, SDL_Rect dst){
 	SDL_RenderCopy(renderer, texture, &src, &dst);
 }
 
+void RenderWindow::render(SDL_Texture* texture, SDL_Rect dst){
+	SDL_RenderCopy(renderer, texture, NULL, &dst);
+}
+
 void RenderWindow::display(){ SDL_RenderPresent(renderer); }
+
+void RenderWindow::destroyTexture(SDL_Texture* texture){
+	SDL_DestroyTexture(texture);
+}
 
 void RenderWindow::cleanUp(){
 	SDL_DestroyRenderer(renderer);

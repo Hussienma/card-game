@@ -1,7 +1,11 @@
 #include "UI.hpp"
 
 void UI::update(Game& game){
+	mouseX = mouseY = 0;
 	input->update(game, *this);
+}
+
+void UI::render(){
 	if(visible)
 		graphics->update(*this);
 }
@@ -26,7 +30,9 @@ void ColorWheel::update(Game& game){
 		game.state = TURNS;
 		std::cout<<"Selected: "<<selectedColor<<std::endl;
 	}
+}
 
+void ColorWheel::render(){
 	if(visible)
 		graphics->update(*this);
 }

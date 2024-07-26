@@ -1,20 +1,42 @@
 #include "Game.hpp"
 #include "Constants.h"
 #include "GameObject.hpp"
+#include "InputComponent.hpp"
 #include "LinkedList.hpp"
+#include "Text.hpp"
+
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_render.h>
+#include <SDL2/SDL_ttf.h>
 #include <cstdlib>
 #include <string>
+#include <vector>
 
-// TODO: 1. Create a map<string, UI> and load all the textures for them
-// 2. To decide who will handle the input use GameState
-// 3. In case the game state is "SELECT_COLOR" let the wheel handle the input and change the color accordingly.
+// TODO: 
+// 2. Add ability to say Uno (not important)
+// 3. Add shadow to cards
+// 5. Create a Controller class with static methods to capture the input
 
 Game::Game(RenderWindow& window): window(&window), state(START){
 	initializeTextures();
 	initializeCards();
 	initializeUIs();
+
+	initializeGame();
+}
+
+Game::~Game(){
+	delete UIs["color wheel"];
+	delete UIs["restart button"];
+
+	window->destroyTexture(textures["cards"]);
+	window->destroyTexture(textures["color wheel"]);
+	window->destroyTexture(textures["button"]);
+	delete player;
+	delete opponent;
+}
+
+void Game::initializeGame(){
 	player = new Player("p1", new PlayerInputComponent());
 	opponent = new Player("p2", new PlayerInputComponent());
 	for(Uint16 i=0; i<cards.size(); i++){
@@ -24,7 +46,7 @@ Game::Game(RenderWindow& window): window(&window), state(START){
 	turns.insertPlayer(*player);
 	turns.insertPlayer(*opponent);
 
-	for(int i=0; i<20; ++i){
+	for(int i=0; i<6; ++i){
 		draw();
 		turns.goNext();
 	}
@@ -32,6 +54,21 @@ Game::Game(RenderWindow& window): window(&window), state(START){
 	opponent->sortCards();
 
 	state = TURNS;
+}
+
+void Game::restart(){
+	state = START;
+	delete player;
+	delete opponent;
+
+	deck.clear();
+	field.clear();
+	turns = LinkedList();
+	winner = nullptr;
+	winnerText = nullptr;
+
+	UIs["restart button"]->visible = false;
+	initializeGame();
 }
 
 void Game::render(){
@@ -46,9 +83,17 @@ void Game::render(){
 		window->render(cardBack->texture, cardBack->frame, oppHandLocation);
 		oppHandLocation.x += 400/opponent->getCardsNumber();
 	}
+}
 
-	// INFO: Rendering UI
-//	UIs["color wheel"]->render();
+void Game::drawUI(){
+	UIs["color wheel"]->render();
+	SDL_Rect position;
+	position.x = position.y = 0;
+	position.w = 100;
+	position.h = 74;
+	if(winnerText)
+		winnerText->render();
+	UIs["restart button"]->render();
 }
 
 void Game::update(){
@@ -61,17 +106,47 @@ void Game::update(){
 		case PICK_COLOR:
 			UIs["color wheel"]->update(*this);
 			break;
+		case FINISHED:
+			UIs["restart button"]->update(*this);
+			break;
+		case RESTART:
+			restart();
+			break;
 		default:
 			break;
 	}
 	
 	// INFO: Do all the rendering here
 	render();
+	drawUI();
 }
 
 void Game::initializeTextures(){
 	textures["cards"] = window->loadTexture("./gfx/Cards.png");
 	textures["color wheel"] = window->loadTexture("./gfx/Color Wheel.png");
+	textures["button"] = window->loadTexture("./gfx/Button.png");
+}
+
+void Game::initializeUIs(){
+	SDL_Rect position, frame;
+	frame.x = frame.y = 0;
+	frame.h = frame.w = 256;
+	position.x = (WINDOW_WIDTH - frame.w)/2;
+	position.y = (WINDOW_HEIGHT - frame.h)/2;
+	position.h = position.w = 256;
+	if(!UIs["color wheel"]){
+		std::cout<<"Initializing color wheel...\n";
+		UIs["color wheel"] = new ColorWheel(position, new GraphicsComponent(window, new Sprite(textures["color wheel"], frame)), new UIInputComponent());
+	}
+
+	if(!UIs["restart button"])
+		UIs["restart button"] = 
+			new RestartButton(
+				new Text(window, {255, 255, 255}, "Play Again!", "Sans", 24, 320, 240),
+				{25, 0, 0}, {320, 240, 150, 50},
+				new GraphicsComponent(window, new Sprite(textures["button"], {0,0,200, 200})),
+				new UIInputComponent()
+			);
 }
 
 void Game::initializeCards(){
@@ -141,16 +216,6 @@ void Game::initializeCards(){
 	cardBack = new Sprite(textures["cards"], frame);
 }
 
-void Game::initializeUIs(){
-	SDL_Rect position, frame;
-	frame.x = frame.y = 0;
-	frame.h = frame.w = 256;
-	position.x = (WINDOW_WIDTH - frame.w)/2;
-	position.y = (WINDOW_HEIGHT - frame.h)/2;
-	position.h = position.w = 256;
-	UIs["color wheel"] = new ColorWheel(position, new GraphicsComponent(window, new Sprite(textures["color wheel"], frame)), new UIInputComponent());
-}
-
 void Game::draw(){
 	Player* player = turns.getCurrentTurn();
 	if(deck.size() == 0){
@@ -204,6 +269,15 @@ bool Game::play(Card* card){
 	if(play == nullptr){
 		std::cerr<<"Invalid play: "<<player->getName()<<" does not have that card!\n";
 		return false;
+	}
+
+	if(player->getCardsNumber() == 0){
+		state = FINISHED;
+		winner = player;
+		std::cout<<winner->getName()<<" won the game!\n";
+		winnerText = new Text(window, {0,0,0}, winner->getName() + " has won!", "Sans", 24, WINDOW_WIDTH/2, WINDOW_HEIGHT/2-100);
+		UIs["restart button"]->visible = true;
+		return true;
 	}
 
 	if(playedWildCard) playedWildCard = false;

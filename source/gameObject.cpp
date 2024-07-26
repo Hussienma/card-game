@@ -26,3 +26,7 @@ void GraphicsComponent::update(UI& ui){
 	window->render(sprite->texture, sprite->frame, ui.position);
 }
 
+void GraphicsComponent::setColor(Uint8 r, Uint8 g, Uint8 b){
+	window->changeTextureColor(sprite->texture, r, g, b);
+}
+

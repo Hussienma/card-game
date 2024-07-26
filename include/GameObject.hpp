@@ -1,4 +1,5 @@
 #pragma once
+#include "Button.hpp"
 #include "Constants.h"
 #include "Utils.hpp"
 #include "RenderWindow.hpp"
@@ -10,6 +11,7 @@ private:
 public:
   GraphicsComponent *graphics;
   GameObject(GraphicsComponent *graphics) : graphics(graphics) {}
+  GameObject(SDL_Rect position, GraphicsComponent *graphics) : position(position), graphics(graphics) {}
   SDL_Rect position;
   bool checkCollision(int x, int y) {
     return (x >= position.x && x <= position.x + position.w &&
@@ -121,5 +123,5 @@ public:
   }
 
   virtual void update(UI& ui);
+  virtual void setColor(Uint8 r, Uint8 g, Uint8 b);
 };
-
