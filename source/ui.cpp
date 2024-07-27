@@ -10,6 +10,8 @@ void UI::render(){
 		graphics->update(*this);
 }
 
+Color ColorWheel::selectedColor;
+
 void ColorWheel::update(Game& game){
 	mouseX = mouseY = 0;
 	input->update(game, *this);

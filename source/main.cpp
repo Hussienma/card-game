@@ -4,17 +4,17 @@
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL.h>
 
+#include "Controller.hpp"
 #include "Index.hpp"
 #include "RenderWindow.hpp"
 #include "Game.hpp"
+#include "UI.hpp"
 #include "Utils.hpp"
 
 ApplicationState state = MAIN_MENU;
+PlayButton playButton;
 
 void update(RenderWindow& window, Game& game){
-	SDL_Texture* buttonTexture = window.loadTexture("./gfx/Button.png");
-	PlayButton playButton(state, new Text(&window, {255,255,255}, "Play", "Sans", 24, 320, 240), {25, 0, 0}, {320, 240, 120, 50}, new GraphicsComponent(&window, new Sprite(buttonTexture, {0, 0, 200, 100})), new UIInputComponent());
-
 	playButton.update(game);
 	
 	playButton.visible = true;
@@ -31,11 +31,14 @@ int main(){
 		std::cerr<<"Failed to initialize TTF!\n";
 		exit(1);
 	}
-
 	
+	Controller controller;
 	RenderWindow window("Game window", 640, 480);
 
 	Game game(window);
+
+	SDL_Texture* buttonTexture = window.loadTexture("./gfx/Button.png");
+	playButton = PlayButton(state, new Text(&window, {255,255,255}, "Play", "Sans", 24, 320, 240), {25, 0, 0}, {320, 240, 120, 50}, new GraphicsComponent(&window, new Sprite(buttonTexture, {0, 0, 200, 100})), new UIInputComponent());
 
 	const float timeStep = 0.01f;
 

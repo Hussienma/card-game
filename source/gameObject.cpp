@@ -14,8 +14,6 @@ void Card::update(){
 
 	float changeRate = (float)hoverAnimation.currentFrame/hoverAnimation.totalFrames;
 	position.y = utils::lerp(352, 312, utils::easeInOut(changeRate));
-
-	render();
 }
 
 void GameObject::render(){

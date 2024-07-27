@@ -13,7 +13,7 @@ class UI {
 	int mouseX, mouseY;
 	bool visible = false;
 	bool hovering = false;
-	UI();
+	UI(){}
 	UI(SDL_Rect position, GraphicsComponent* graphics, InputComponent* input): position(position), graphics(graphics), input(input){}
 	virtual void update(Game& game);
 	virtual void render();
@@ -25,7 +25,7 @@ class UI {
 
 class ColorWheel: public UI {
 	public:
-	Color selectedColor;
+	static Color selectedColor;
 	ColorWheel();
 	ColorWheel(SDL_Rect position, GraphicsComponent* graphics, InputComponent* input): UI(position, graphics, input){}
 	virtual void update(Game& game);
@@ -36,7 +36,7 @@ class Button: public UI {
 	private:
 	Text* text;
 	public:
-	Button();
+	Button(){}
 	Button(Text* text, SDL_Color color, SDL_Rect position, GraphicsComponent* graphics, InputComponent* input);
 
 	void update(Game& game);
@@ -55,7 +55,7 @@ class RestartButton: public Button {
 class PlayButton: public Button {
 	public:
 	ApplicationState* state;
-	PlayButton();
+	PlayButton(){}
 	PlayButton(ApplicationState& state, Text* text, SDL_Color color, SDL_Rect position, GraphicsComponent* graphics, InputComponent* input): state(&state), Button(text, color, position, graphics, input){}
 	void onPress(Game& game) override { *state = IN_GAME; }
 };

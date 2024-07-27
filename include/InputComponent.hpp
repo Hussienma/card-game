@@ -1,7 +1,8 @@
 #pragma once
-#include "Index.hpp"
 #include "Game.hpp"
 #include "Player.hpp"
+#include "Controller.hpp"
+
 #include <SDL2/SDL.h>
 
 class InputComponent {
@@ -14,6 +15,12 @@ public:
 class PlayerInputComponent : public InputComponent {
 public:
   PlayerInputComponent(): InputComponent(){}
+  virtual void update(Game &game, Player &player);
+};
+
+class PlayerAIInputComponent : public InputComponent {
+public:
+  PlayerAIInputComponent(): InputComponent(){}
   virtual void update(Game &game, Player &player);
 };
 

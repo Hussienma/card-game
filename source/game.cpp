@@ -12,10 +12,11 @@
 #include <string>
 #include <vector>
 
-// TODO: 
+// TODO: 1. UI to indicate turn
 // 2. Add ability to say Uno (not important)
 // 3. Add shadow to cards
-// 5. Create a Controller class with static methods to capture the input
+//
+// WARN: if the last played card is wild an error happens
 
 Game::Game(RenderWindow& window): window(&window), state(START){
 	initializeTextures();
@@ -38,7 +39,7 @@ Game::~Game(){
 
 void Game::initializeGame(){
 	player = new Player("p1", new PlayerInputComponent());
-	opponent = new Player("p2", new PlayerInputComponent());
+	opponent = new Player("p2", new PlayerAIInputComponent());
 	for(Uint16 i=0; i<cards.size(); i++){
 		deck.push_back(&cards[i]);
 	}
@@ -66,6 +67,7 @@ void Game::restart(){
 	turns = LinkedList();
 	winner = nullptr;
 	winnerText = nullptr;
+	playedWildCard = false;
 
 	UIs["restart button"]->visible = false;
 	initializeGame();
@@ -74,6 +76,8 @@ void Game::restart(){
 void Game::render(){
 	if(field.size() > 0)
 		field.back()->render();
+	player->render();
+
 	SDL_Rect oppHandLocation;
 	oppHandLocation.x = 128;
 	oppHandLocation.y = 0;
@@ -295,7 +299,9 @@ bool Game::play(Card* card){
 		case DRAW_4: 
 			playDrawCard(4);
 		case WILD: 
-			playChangeColor(card->getColor());
+			playedWildCard = true;
+			if(player == this->player)
+				playChangeColor(card->getColor());
 			break;
 		default:
 			std::cout<<"Played a number card.\n";
@@ -311,8 +317,6 @@ bool Game::play(Card* card){
 	field.push_back(card);
 
 	player->sortCards();
-	std::cout<<"game state is: "<<state<<std::endl;
-	std::cout<<"Is the wheel visible: "<<wheel->visible<<std::endl;
 	return true;
 }
 
@@ -338,7 +342,6 @@ void Game::playDrawCard(int number){
 
 void Game::playChangeColor(Color color){
 	std::cout<<"Played wild card\n";
-	playedWildCard = true;
 	UIs["color wheel"]->visible = true;
 	state = PICK_COLOR;
 }
@@ -352,7 +355,7 @@ void Game::refillDeck(){
 	}
 }
 
-Card* Game::getCardOnField(){ return field.back(); }
+Card* Game::getCardOnField(){ return field.size() == 0 ? nullptr : field.back(); }
 
 Player* Game::getCurrentPlayerTurn(){ return turns.getCurrentTurn(); }
 
