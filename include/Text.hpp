@@ -15,7 +15,7 @@ class Text {
 	SDL_Rect position;
 	Text();
 	Text(RenderWindow* window, SDL_Color color, std::string text, std::string fontFamily, int fontSize, int posX, int posY): window(window){
-		std::string fontPath = "./gfx/"+ fontFamily +".ttf";
+		std::string fontPath = "./fonts/"+ fontFamily +".ttf";
 		font = TTF_OpenFont(fontPath.c_str(), fontSize);
 		if(!font){
 			std::cerr<<"Error loading font "<<SDL_GetError()<<std::endl;

@@ -11,12 +11,12 @@
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_ttf.h>
 #include <cstdlib>
+#include <time.h>
 #include <string>
 #include <vector>
 
 // TODO: 1. UI to indicate turn
-// 2. Add hover effect to buttons and change the texture
-// 3. Style the main menu better
+// 2. UI to indicate the chosen color
 
 Game::Game(RenderWindow& window): window(&window), state(START){
 	initializeTextures();

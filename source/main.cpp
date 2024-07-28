@@ -26,7 +26,7 @@ void update(RenderWindow& window, Game& game){
 	quitButton.render();
 }
 
-int main(){
+int main(int argc, char* argv[]){
 	if(SDL_Init(SDL_INIT_VIDEO) == -1){
 		std::cerr<<"Unable to initialize SDL" <<SDL_GetError()<<std::endl;
 		exit(1);
