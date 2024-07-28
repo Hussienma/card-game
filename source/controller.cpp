@@ -13,5 +13,5 @@ SDL_Event* Controller::handleInput(Game& game){
 				return event;
 		}
 	}
-	return event;
+	return nullptr;
 }

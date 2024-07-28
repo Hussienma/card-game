@@ -5,7 +5,7 @@
 #include "InputComponent.hpp"
 
 void PlayerInputComponent::update(Game& game, Player& player){
-	SDL_Event* event = Controller::handleInput(game);
+	SDL_Event* event = Controller::event;
 	switch(event->type){
 		case SDL_MOUSEBUTTONDOWN:
 			for(int i=player.getCards().size()-1; i>=0; --i){
@@ -63,7 +63,8 @@ void PlayerAIInputComponent::update(Game& game, Player& player){
 }
 
 void UIInputComponent::update(Game& game, UI& ui){
-	SDL_Event* event = Controller::handleInput(game);
+	SDL_Event* event = Controller::event;
+	if(event != nullptr)
 		switch(event->type){
 			case SDL_QUIT:
 				game.state = QUIT;
@@ -71,6 +72,14 @@ void UIInputComponent::update(Game& game, UI& ui){
 			case SDL_MOUSEBUTTONDOWN:
 				ui.mouseX = event->button.x;
 				ui.mouseY = event->button.y;
+				break;
+			case SDL_MOUSEMOTION:
+				if(ui.checkCollision(event->button.x, event->button.y)){
+					ui.hovering = true;
+				}
+				else{
+					ui.hovering = false;
+				}
 				break;
 		}
 }

@@ -1,6 +1,8 @@
 #pragma once
 #include "GameObject.hpp"
 #include "Index.hpp"
+#include "Constants.h"
+
 #include <map>
 #include <vector>
 
@@ -9,7 +11,7 @@ private:
 	Uint16 size = 0;
 	std::vector<Card*> cards;
 	std::string name;
-	int handLocation = 352;
+	int handLocation = WINDOW_HEIGHT - CARD_HEIGHT;
 	InputComponent* input;
 	std::map<Color, int> numberOfCardsByColor;
 

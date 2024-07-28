@@ -26,7 +26,7 @@ private:
 	Player* player;
 	Player* opponent;
 	Player* winner = nullptr;
-	Text* winnerText;
+	Text* winnerText = nullptr;
 	LinkedList turns;
 	Sprite* cardBack;
 	bool playedWildCard = false;

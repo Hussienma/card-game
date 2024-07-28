@@ -1,6 +1,4 @@
 #include "GameObject.hpp"
-#include "Game.hpp"
-#include "Player.hpp"
 
 void GameObject::update(){
 //	std::cout<<"GameObject update method\n";
@@ -13,7 +11,7 @@ void Card::update(){
 		hoverAnimation.currentFrame--;
 
 	float changeRate = (float)hoverAnimation.currentFrame/hoverAnimation.totalFrames;
-	position.y = utils::lerp(352, 312, utils::easeInOut(changeRate));
+	position.y = utils::lerp(WINDOW_HEIGHT - CARD_HEIGHT, WINDOW_HEIGHT - CARD_HEIGHT - ((float)CARD_HEIGHT/4), utils::easeInOut(changeRate));
 }
 
 void GameObject::render(){
@@ -21,6 +19,19 @@ void GameObject::render(){
 }
 
 void GraphicsComponent::update(UI& ui){
+	if (renderShadows) {
+		SDL_Rect shadowPosition = ui.position;
+		if(ui.hovering){
+			shadowPosition.x -= 3;
+			shadowPosition.y += 4;
+		}
+		else {
+			shadowPosition.x -= 1;
+			shadowPosition.y += 2;
+		}
+		window->render(sprite->shadowTexture, shadowPosition);
+	}
+
 	window->render(sprite->texture, sprite->frame, ui.position);
 }
 

@@ -4,7 +4,9 @@
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL.h>
 
+#include "Constants.h"
 #include "Controller.hpp"
+#include "GameObject.hpp"
 #include "Index.hpp"
 #include "RenderWindow.hpp"
 #include "Game.hpp"
@@ -13,12 +15,15 @@
 
 ApplicationState state = MAIN_MENU;
 PlayButton playButton;
+QuitButton quitButton;
 
 void update(RenderWindow& window, Game& game){
+	Controller::handleInput(game);
 	playButton.update(game);
+	quitButton.update(game);
 	
-	playButton.visible = true;
 	playButton.render();
+	quitButton.render();
 }
 
 int main(){
@@ -33,13 +38,27 @@ int main(){
 	}
 	
 	Controller controller;
-	RenderWindow window("Game window", 640, 480);
+	RenderWindow window("Game window", WINDOW_WIDTH, WINDOW_HEIGHT);
 
 	Game game(window);
 
-	SDL_Texture* buttonTexture = window.loadTexture("./gfx/Button.png");
-	playButton = PlayButton(state, new Text(&window, {255,255,255}, "Play", "Sans", 24, 320, 240), {25, 0, 0}, {320, 240, 120, 50}, new GraphicsComponent(&window, new Sprite(buttonTexture, {0, 0, 200, 100})), new UIInputComponent());
+	SDL_Texture* background = window.loadTexture("./gfx/Background Pattern.png");
+	SDL_Texture* logoTexture = window.loadTexture("./gfx/Logo.png");
+	UI logo({CENTER_HOR, CENTER_VER-70, WINDOW_WIDTH, static_cast<int>(0.67*WINDOW_WIDTH)}, new GraphicsComponent(&window, new Sprite(logoTexture, {0, 0, 600, 400})));
+	logo.visible = true;
+	logo.hoverAnimation = new Animation(20);
 
+	SDL_Texture* shadowTexture = window.loadTexture("./gfx/Shadow.png");
+	SDL_Texture* buttonTexture1 = window.loadTexture("./gfx/Button.png");
+	SDL_Texture* buttonTexture2 = window.loadTexture("./gfx/Button.png");
+	SDL_Color white = {255, 255, 255};
+	SDL_Color btnPrimary = { 102, 123, 198 };
+	SDL_Color btnSecondary = { 180, 70, 30 };
+	playButton = PlayButton(state, new Text(&window, white, "Play", "Sans", 24, CENTER_HOR-80, CENTER_VER+WINDOW_HEIGHT/4), btnPrimary, {CENTER_HOR-80, CENTER_VER+WINDOW_HEIGHT/4, 120, 50}, new GraphicsComponent(&window, new Sprite(buttonTexture1, {0, 0, 200, 100}, shadowTexture), true), new UIInputComponent());
+	quitButton = QuitButton(new Text(&window, white, "Quit", "Sans", 24, CENTER_HOR+80, CENTER_VER+WINDOW_HEIGHT/4), btnSecondary, {CENTER_HOR+80, CENTER_VER+WINDOW_HEIGHT/4, 120, 50}, new GraphicsComponent(&window, new Sprite(buttonTexture2, {0, 0, 200, 100}, shadowTexture), true), new UIInputComponent());
+
+	playButton.visible = true;
+	quitButton.visible = true;
 	const float timeStep = 0.01f;
 
 	float accumulator = 0.0f;
@@ -56,11 +75,14 @@ int main(){
 
 		while(accumulator >= timeStep){
 			window.clear();
+			window.render(background, {0,0,WINDOW_WIDTH, WINDOW_HEIGHT}, {0,0,WINDOW_WIDTH, WINDOW_HEIGHT});
 			switch(state){
 				case IN_GAME:
 					game.update();
 					break;
 				case MAIN_MENU:
+					logo.animate();
+					logo.render();
 					update(window, game);
 					break;
 			}

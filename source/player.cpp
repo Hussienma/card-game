@@ -28,7 +28,6 @@ void Player::draw(Card* card){
 	numberOfCardsByColor[card->getColor()] += 1;
 	cards.push_back(card);
 	std::cout<<name<<" drew a "<<card->getColorString()<<" "<<card->getValue()<<std::endl;
-	std::cout<<getName()<<"'s current dominant color is: "<<getDominantColor()<<std::endl;
 }
 
 Card* Player::play(Card* card){
@@ -48,17 +47,21 @@ Card* Player::play(Card* card){
 void Player::sortCards(){
 	std::sort(cards.begin(), cards.end());
 
-	int i = 128;
-	for(Card* card: cards){
-		int temp = i;
-		card->hover = false;
-		card->position.x = i;
-		// INFO: the y position was set to hand position
-		card->position.y = handLocation;
+	if(getCardsNumber() != 0){
+		int incrementBy = (WINDOW_WIDTH/2)/(getCardsNumber());
+		int i = WINDOW_WIDTH/4;
 
-		card->position.w = CARD_WIDTH;
-		card->position.h = CARD_HEIGHT;
-		i += (400)/getCardsNumber();
+		for(Card* card: cards){
+			int temp = i;
+			card->hover = false;
+			card->position.x = i;
+			// INFO: the y position was set to hand position
+			card->position.y = handLocation;
+
+			card->position.w = CARD_WIDTH;
+			card->position.h = CARD_HEIGHT;
+			i += incrementBy;
+		}
 	}
 }
 

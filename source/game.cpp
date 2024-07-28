@@ -1,9 +1,11 @@
 #include "Game.hpp"
 #include "Constants.h"
+#include "Controller.hpp"
 #include "GameObject.hpp"
 #include "InputComponent.hpp"
 #include "LinkedList.hpp"
 #include "Text.hpp"
+#include "UI.hpp"
 
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_render.h>
@@ -13,10 +15,8 @@
 #include <vector>
 
 // TODO: 1. UI to indicate turn
-// 2. Add ability to say Uno (not important)
-// 3. Add shadow to cards
-//
-// WARN: if the last played card is wild an error happens
+// 2. Add hover effect to buttons and change the texture
+// 3. Style the main menu better
 
 Game::Game(RenderWindow& window): window(&window), state(START){
 	initializeTextures();
@@ -38,8 +38,8 @@ Game::~Game(){
 }
 
 void Game::initializeGame(){
-	player = new Player("p1", new PlayerInputComponent());
-	opponent = new Player("p2", new PlayerAIInputComponent());
+	player = new Player("Player 1", new PlayerInputComponent());
+	opponent = new Player("Player 2", new PlayerAIInputComponent());
 	for(Uint16 i=0; i<cards.size(); i++){
 		deck.push_back(&cards[i]);
 	}
@@ -47,7 +47,7 @@ void Game::initializeGame(){
 	turns.insertPlayer(*player);
 	turns.insertPlayer(*opponent);
 
-	for(int i=0; i<6; ++i){
+	for(int i=0; i<20; ++i){
 		draw();
 		turns.goNext();
 	}
@@ -79,13 +79,16 @@ void Game::render(){
 	player->render();
 
 	SDL_Rect oppHandLocation;
-	oppHandLocation.x = 128;
-	oppHandLocation.y = 0;
-	oppHandLocation.w = CARD_WIDTH;
-	oppHandLocation.h = CARD_HEIGHT;
-	for(Card* card: opponent->getCards()){
-		window->render(cardBack->texture, cardBack->frame, oppHandLocation);
-		oppHandLocation.x += 400/opponent->getCardsNumber();
+	if(opponent->getCardsNumber() != 0){
+		int incrementBy = (WINDOW_WIDTH/2)/(opponent->getCardsNumber());
+		oppHandLocation.x = WINDOW_WIDTH/4;
+		oppHandLocation.y = 0;
+		oppHandLocation.w = CARD_WIDTH;
+		oppHandLocation.h = CARD_HEIGHT;
+		for(Card* card: opponent->getCards()){
+			window->render(cardBack->texture, cardBack->frame, oppHandLocation);
+			oppHandLocation.x += incrementBy;
+		}
 	}
 }
 
@@ -95,12 +98,15 @@ void Game::drawUI(){
 	position.x = position.y = 0;
 	position.w = 100;
 	position.h = 74;
-	if(winnerText)
+	if(winnerText != nullptr){
+		UIs["frame"]->render();
 		winnerText->render();
+	}
 	UIs["restart button"]->render();
 }
 
 void Game::update(){
+	Controller::handleInput(*this);
 	switch(state){
 		case TURNS: {
 			Player* player = turns.getCurrentTurn();
@@ -127,27 +133,32 @@ void Game::update(){
 
 void Game::initializeTextures(){
 	textures["cards"] = window->loadTexture("./gfx/Cards.png");
+	textures["card shadow"] = window->loadTexture("./gfx/Shadow.png");
 	textures["color wheel"] = window->loadTexture("./gfx/Color Wheel.png");
 	textures["button"] = window->loadTexture("./gfx/Button.png");
+	textures["frame"] = window->loadTexture("./gfx/Frame.png");
 }
 
 void Game::initializeUIs(){
 	SDL_Rect position, frame;
 	frame.x = frame.y = 0;
 	frame.h = frame.w = 256;
-	position.x = (WINDOW_WIDTH - frame.w)/2;
-	position.y = (WINDOW_HEIGHT - frame.h)/2;
+	position.x = CENTER_HOR;
+	position.y = CENTER_VER;
 	position.h = position.w = 256;
 	if(!UIs["color wheel"]){
 		std::cout<<"Initializing color wheel...\n";
 		UIs["color wheel"] = new ColorWheel(position, new GraphicsComponent(window, new Sprite(textures["color wheel"], frame)), new UIInputComponent());
 	}
 
+	if(!UIs["frame"])
+		UIs["frame"] = new UI({CENTER_HOR, CENTER_VER, 350, 200}, new GraphicsComponent(window, new Sprite(textures["frame"], {0,0, 400, 400})));
+
 	if(!UIs["restart button"])
 		UIs["restart button"] = 
 			new RestartButton(
-				new Text(window, {255, 255, 255}, "Play Again!", "Sans", 24, 320, 240),
-				{25, 0, 0}, {320, 240, 150, 50},
+				new Text(window, {255, 255, 255}, "Play Again!", "Sans", 24, CENTER_HOR, CENTER_VER+30),
+				{0, 100, 50}, {CENTER_HOR, CENTER_VER+30, 150, 50},
 				new GraphicsComponent(window, new Sprite(textures["button"], {0,0,200, 200})),
 				new UIInputComponent()
 			);
@@ -170,11 +181,11 @@ void Game::initializeCards(){
 		frame.y = i*256;
 		frame.x = 0;
 
-		cards.push_back(Card(NUMBER, color, 0, new GraphicsComponent(window, new Sprite(textures["cards"], frame))));
+		cards.push_back(Card(NUMBER, color, 0, new GraphicsComponent(window, new Sprite(textures["cards"], frame, textures["card shadow"]), true)));
 
 		frame.x = 192;
 		for(int j=1; j<10; ++j){
-			Card card = Card(NUMBER, color, j, new GraphicsComponent(window, new Sprite(textures["cards"], frame)));
+			Card card = Card(NUMBER, color, j, new GraphicsComponent(window, new Sprite(textures["cards"], frame, textures["card shadow"]), true));
 			cards.push_back(card);
 			cards.push_back(card);
 			frame.x += 192;
@@ -182,21 +193,21 @@ void Game::initializeCards(){
 
 		for(int j=0; j<2; ++j){
 			cards.push_back(
-				Card(REVERSE, color, 10, new GraphicsComponent(window, new Sprite(textures["cards"], frame)))
+				Card(REVERSE, color, 10, new GraphicsComponent(window, new Sprite(textures["cards"], frame, textures["card shadow"]), true))
 			);
 		}
 
 		frame.x += 192;
 		for(int j=0; j<2; ++j){
 			cards.push_back(
-				Card(DRAW_2, color, 11, new GraphicsComponent(window, new Sprite(textures["cards"], frame)))
+				Card(DRAW_2, color, 11, new GraphicsComponent(window, new Sprite(textures["cards"], frame, textures["card shadow"]), true))
 			);
 		}
 
 		frame.x += 192;
 		for(int j=0; j<2; ++j){
 			cards.push_back(
-				Card(SKIP, color, 12, new GraphicsComponent(window, new Sprite(textures["cards"], frame)))
+				Card(SKIP, color, 12, new GraphicsComponent(window, new Sprite(textures["cards"], frame, textures["card shadow"]), true))
 			);
 		}
 	}
@@ -206,14 +217,14 @@ void Game::initializeCards(){
 	frame.y = 0;
 	for(int i=0; i<4; ++i)
 		cards.push_back(
-			Card(WILD, color, 13, new GraphicsComponent(window, new Sprite(textures["cards"], frame)))
+			Card(WILD, color, 13, new GraphicsComponent(window, new Sprite(textures["cards"], frame, textures["card shadow"]), true))
 		);
 
 	// WILD +4 cards
 	frame.y = 256;
 	for(int i=0; i<4; ++i)
 		cards.push_back(
-			Card(DRAW_4, color, 14, new GraphicsComponent(window, new Sprite(textures["cards"], frame)))
+			Card(DRAW_4, color, 14, new GraphicsComponent(window, new Sprite(textures["cards"], frame, textures["card shadow"]), true))
 		);
 
 	frame.y += 256;
@@ -254,7 +265,7 @@ bool Game::play(Card* card){
 
 	ColorWheel* wheel = (ColorWheel*)UIs["color wheel"];
 
-	if(playedWildCard && wheel->selectedColor != card->getColor()){
+	if(playedWildCard && (wheel->selectedColor != card->getColor() && card->getValue() < 13)){
 		std::cerr<<"Invalid play: card isn't the chosen color.\n";
 		return false;
 	}
@@ -279,8 +290,9 @@ bool Game::play(Card* card){
 		state = FINISHED;
 		winner = player;
 		std::cout<<winner->getName()<<" won the game!\n";
-		winnerText = new Text(window, {0,0,0}, winner->getName() + " has won!", "Sans", 24, WINDOW_WIDTH/2, WINDOW_HEIGHT/2-100);
+		winnerText = new Text(window, {0,0,0}, winner->getName() + " has won!", "Sans", 32, CENTER_HOR, CENTER_VER-60);
 		UIs["restart button"]->visible = true;
+		UIs["frame"]->visible = true;
 		return true;
 	}
 
@@ -309,10 +321,10 @@ bool Game::play(Card* card){
 
 	turns.goNext();
 	card->hover = false;
-	card->position.x = (640-card->position.w/2)/2;
-	card->position.y = (480-card->position.h/2)/2;
-	card->position.w /=2;
-	card->position.h /=2;
+	card->position.w /=1.2;
+	card->position.h /=1.2;
+	card->position.x = (CENTER_HOR-card->position.w/2);
+	card->position.y = (CENTER_VER-card->position.h/2);
 
 	field.push_back(card);
 
@@ -348,7 +360,6 @@ void Game::playChangeColor(Color color){
 
 void Game::refillDeck(){
 	for(Card* card: field){
-		// WARNING: The deck does not refill if the players have all the cards
 		if(field.size() == 1) break;
 		deck.push_back(field.front());
 		field.erase(field.begin());

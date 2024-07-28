@@ -5,9 +5,9 @@
 
 class Controller {
 	private:
-	static SDL_Event* event;
 	
 	public:
+	static SDL_Event* event;
 	Controller(){
 		event = new SDL_Event();
 	}

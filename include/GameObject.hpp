@@ -1,9 +1,9 @@
 #pragma once
-#include "Button.hpp"
 #include "Constants.h"
-#include "Utils.hpp"
 #include "RenderWindow.hpp"
 #include "UI.hpp"
+#include "Utils.hpp"
+
 #include <SDL2/SDL.h>
 
 class GameObject {
@@ -11,7 +11,8 @@ private:
 public:
   GraphicsComponent *graphics;
   GameObject(GraphicsComponent *graphics) : graphics(graphics) {}
-  GameObject(SDL_Rect position, GraphicsComponent *graphics) : position(position), graphics(graphics) {}
+  GameObject(SDL_Rect position, GraphicsComponent *graphics)
+      : position(position), graphics(graphics) {}
   SDL_Rect position;
   bool checkCollision(int x, int y) {
     return (x >= position.x && x <= position.x + position.w &&
@@ -22,10 +23,12 @@ public:
 };
 
 struct Animation {
-	int currentFrame = 0;
-	int totalFrames;
-	Animation(): totalFrames(40){}
-	Animation(int frames): totalFrames(frames){}
+  int currentFrame = 0;
+  int totalFrames;
+  bool finished = false;
+
+  Animation() : totalFrames(40) {}
+  Animation(int frames) : totalFrames(frames) {}
 };
 
 class Card : public GameObject {
@@ -45,9 +48,9 @@ public:
     position.w = CARD_WIDTH;
     position.h = CARD_HEIGHT;
   }
-virtual void update();
+  virtual void update();
   Color getColor() { return color; }
-  void setColor(Color val){ color = val; }
+  void setColor(Color val) { color = val; }
   std::string getColorString() {
     switch (color) {
     case YELLOW:
@@ -98,30 +101,48 @@ virtual void update();
 
 struct Sprite {
   SDL_Texture *texture;
+  SDL_Texture *shadowTexture;
   SDL_Rect frame;
 
   Sprite(SDL_Texture *texture, SDL_Rect frame)
       : texture(texture), frame(frame) {}
+  Sprite(SDL_Texture *texture, SDL_Rect frame, SDL_Texture *shadowTexture)
+      : texture(texture), frame(frame), shadowTexture(shadowTexture) {}
 };
 
 class GraphicsComponent {
 private:
   RenderWindow *window;
   Sprite *sprite;
+  bool renderShadows = false;
 
 public:
   GraphicsComponent(RenderWindow *window, Sprite *sprite)
       : window(window), sprite(sprite) {}
+  GraphicsComponent(RenderWindow *window, Sprite *sprite, bool renderShadows)
+      : window(window), sprite(sprite), renderShadows(renderShadows) {}
   virtual void update(GameObject &obj) {
+    if (renderShadows) {
+      SDL_Rect shadowPosition = obj.position;
+      shadowPosition.x -= 2;
+      shadowPosition.y += 4;
+      window->render(sprite->shadowTexture, shadowPosition);
+    }
+
     window->render(sprite->texture, sprite->frame, obj.position);
   }
 
   virtual void update(Card &card) {
-    std::cout << "Rendering " << card.getColorString() << " of "
-              << card.getValue() << std::endl;
+    if (renderShadows) {
+      SDL_Rect shadowPosition = card.position;
+      shadowPosition.x -= 2;
+      shadowPosition.y -= 4;
+      window->render(sprite->shadowTexture, shadowPosition);
+    }
+
     window->render(sprite->texture, sprite->frame, card.position);
   }
 
-  virtual void update(UI& ui);
+  virtual void update(UI &ui);
   virtual void setColor(Uint8 r, Uint8 g, Uint8 b);
 };
